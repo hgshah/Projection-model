@@ -1,0 +1,78 @@
+NAME: RAGUR KRISHNAN
+ID #: 1530464
+NAME: HARSH G SHAH
+ID #: 1561306
+CMPUT 274 FA17
+CMPUT 274 PROJECT
+Our project displays the 2D visualization of a 4D shape. In particular, it displays the 2D perspective projection of the 3D orthogonal projection of a regular 4D polytope (the 4D analog of the platonic solids in 3-space.) This program allows the user to rotate an object in 4-space about an arbitrary plane of rotation by using the two joysticks. More precisely, any skew rotation about an arbitrary plane in 4-space is a composition of the simple rotations about the 6 coordinate planes (i.e., XY, XW, YZ), which is analogous to how a skew rotation in 3-space is a composition of rotations about the 3 coordinate axes. So, the two joysticks provide six inputs that are used to determine the angles of rotation.
+
+As for a purpose, dimensions higher than our everyday 3 can be mysterious and intangle. By allowing people to interact with these representative shapes, this project aims to broaden people's understanding of at least 4-space.
+
+Accessories
+(1) Arduino Mega Board (AMG)
+(2) Joysticks
+(1) MicroSD card
+Wiring instructions
+Display
+pin 4 <--> CCS
+pin 6 <--> RST
+pin 9 <--> DC
+pin 10 <--> CS
+pin 50 <--> MISO
+pin 51 <--> MOSI
+pin 52 <--> CLK
+
+Joystick 1
+A0 <--> Vrx
+A1 <--> Vry
+pin 22 <--> SW
+
+Joystick 2
+A2 <--> Vrx
+A3 <--> Vry
+pin 24 <--> SW
+Running instructions
+Firstly, copy the contents inside the directory "SD_DATA" onto a microSD card. Then, wire the Arduino as per the wiring instructions.
+Afterward, navigate to the folder called "sketch" and enter the commands "make upload" followed by "serial-mon". By default, the 
+hypercube is displayed. You may rotate the current shape by moving and pressing the joysticks. Also, you can specify one of three
+shapes to display by following commands as specified by the prompt in the serial monitor: "O" for orthoplex, "S" for simplex, 
+and "C" for the hypercube (incorrect input results in the hypercube).
+Time line
+week 1 was dedicated to a rough analysis and laying the groundwork of our project.
+1) Our first goal was to acquire information about the 4-polytopes from Wikipedia like the edges between vertices
+2) We went on to generate the barycentric coordinates (of the vertices) and the edges of the shapes
+3) Then, we decided to store this information on the SD card, so the sketch only had to read the shapes from the SD card.
+    This meant creating a separate program "SD_Write.cpp" that wrote the data onto the SD card.
+4) To create a compact representation of the shapes, we decided to create and store the Eulerian circuit of the 
+    shape on the SD card, rather than an edge list. The reason behind this was to halve the amount of information we 
+    needed to represent the edges since we only needed to store only E+1 integers instead of 2*E integers to render 
+    the edges, where E is the number of edges. Having an even degree for all their vertices, the undirected graphs 
+    of all the chosen polytopes were eulerian. As for implementation, we precomputed the Eulerian circuits in the 
+    file "generateData.cpp" and wrote the resulting circuits onto the sd card using "SD_Write.cpp."
+5) Finally, we ruled out shapes with a large number of vertices due to the limited power and memory of the display
+    and the Arduino respectively
+week 2 was focused on implementing the rotations and projections.
+1) In 4-space the six rotation matrices are about the XY, XZ, XW, YZ, YW, ZW planes. The user provides the angles
+    for rotation via the joysticks. We mapped the initial coordinates of the vertices to their new locations by applying 
+    the rotation matrices, and this is all carried out in the file "sketch.cpp".
+2) The next task was to project the transformed points onto a 2D plane. We first projected the 4D points onto 3-space
+    by discarding the 4th component of each point. Then, we applied a perspective projection of the 3D points onto 2D
+    using a formula obtained from the Wikipedia article on projection.
+3) To render the wireframe outline of the projection, we just walked along the Eulerian circuit and drawn a line
+    connecting the previous vertex to the current vertex we've visited. Similarly, to remove the old image of the
+    shape, we just drew over the old lines with the background color.
+4) By updating the display only if the user has moved a joystick beyond a certain threshold value, we avoided
+    unnecceessary animation and improved the performance of our program
+5) As an optimization, we pre-multiplied the matrices pairwise once to cut down the number of multiplications from
+    6 to 3 at every iteration. In other words, there are now three rotation matrices that each controll the rotation
+    about two of the coordinate planes.
+week 3 was focused on adding user-friendly features.
+1) Now, we allowed the user to specify the displayed shape via the serial monitor
+2) We cleaned up and commented the code
+3) Also, we speculated a way to include larger polytopes by using a 3D convex hull to trim the polytope's 3D projection
+    before projecting it once more to 2D. However, we were unsuccessful in implementing this improvement.
+References
+Regular 4-polytopes
+Perspective projections
+Rotations in 4-space
+Eulerian Paths
